@@ -1,0 +1,308 @@
+---
+title: "EDA. Taras Rodzin"
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+#install.packages("janitor")
+#install.packages("naniar")
+#install.packages("ggpubr")
+#install.packages("plotly")
+library(ggplot2)
+library(janitor)
+library(dplyr)
+library(naniar)
+library(ggplot2)
+library(plotly)
+library(ggpubr)
+```
+
+## **Read Data**
+The first step is to read the data and to pre-process it properly for a further analysis.
+```{r}
+setwd("D:/Studium/year_two/summer-internships/nyu-ml-course") 
+raw_data <- as.data.frame(read.table("D:/Studium/year_two/summer-internships/nyu-ml-course/fars.dat", header=TRUE, skip = 34, sep= ","))
+head(raw_data, 5)
+```
+## **Distributions Analysis**
+```{r}
+summary(raw_data) 
+```
+```{r}
+temp <- filter(raw_data, (INJURY_SEVERITY != "Unknown") & (INJURY_SEVERITY != "Unknown") & (SEX != "Unknown") & (TAKEN_TO_HOSPITAL != "Unknown"))
+```
+
+### **Get column names**
+```{r}
+col_labels <- names(raw_data)
+features <- col_labels[col_labels != "INJURY_SEVERITY"]
+features
+```
+
+
+### **Get numerical & categorical column names**
+```{r}
+if_numerical <- unlist(lapply(raw_data, is.numeric))
+numerical_c <- c(col_labels[if_numerical == TRUE])
+categorical_c <- c(col_labels[if_numerical == FALSE])
+```
+
+### **Numerical columns**
+```{r}
+numerical_c
+```
+
+### **Categorical columns**
+```{r}
+categorical_c
+```
+
+### **Check If Nan values are present in any column.**
+```{r}
+cnames <- colnames(raw_data)
+for(i in 1:ncol(raw_data)) {
+  cat(cnames[i], ": ", sum(is.na(raw_data[ , i])))
+  cat("\n")
+}
+```
+
+### **Check If "Unknown" values are present in any column.**
+```{r}
+unknowns <- c()
+col_labels <- c()
+
+for(i in 1:ncol(raw_data)) {
+  feat <- cnames[i]
+  n_unknowns <- sum(grepl("Unknown", raw_data[ , i], fixed = TRUE) == TRUE)
+  
+  cat(feat, ": ", n_unknowns)
+  cat("\n")
+  
+  unknowns <- append(unknowns, n_unknowns)
+  col_labels <- append(col_labels, feat)
+}
+```
+
+### **Plot the distribution of "Unknown" values.**
+```{r}
+fig <- plot_ly(y=unknowns, x=col_labels, type = 'bar') %>% 
+  layout(xaxis = list(categoryorder = "total descending"),
+         title = "'Unknown' values distribution among columns")
+fig
+```
+
+### **Check Class Distribution of Target Variable**
+```{r}
+fig <- plot_ly(raw_data, labels = ~INJURY_SEVERITY, type = 'pie')
+fig <- fig %>% layout(title = 'INJURY_SEVERITY classes distribution',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+```
+## **Plot Distribution of Numerical Columns**
+### **Plot the distribution of Age feature**
+```{r}
+dens <- density(raw_data$AGE)
+
+
+fig <- plot_ly(
+  data = raw_data,
+  x = ~AGE,
+  type = "histogram",
+  name = "Age"
+) %>% 
+  add_lines(x = dens$x, y = dens$y, yaxis = "y2", name = "Density") %>% 
+  layout(yaxis2 = list(overlaying = "y", #Adds the dual y-axis
+                       side = "right", #Adds the density axis on the right side
+                       rangemode = "tozero")) %>%
+  layout(title = 'AGE column distribution')
+fig
+```
+
+### **Plot the distribution of ALCOHOL_TEST_RESULT feature**
+```{r}
+dens <- density(raw_data$ALCOHOL_TEST_RESULT)
+
+
+fig <- plot_ly(
+  data = raw_data,
+  x = ~ALCOHOL_TEST_RESULT,
+  type = "histogram",
+  name = "Age"
+) %>% 
+  add_lines(x = dens$x, y = dens$y, yaxis = "y2", name = "Density") %>% 
+  layout(yaxis2 = list(overlaying = "y", #Adds the dual y-axis
+                       side = "right", #Adds the density axis on the right side
+                       rangemode = "tozero")) %>%
+  layout(title = 'ALCOHOL_TEST_RESULT column distribution')
+fig
+```
+
+### **Plot the distribution of DRUG_TEST_RESULTS_.1_of_3. feature**
+```{r}
+dens <- density(raw_data$DRUG_TEST_RESULTS_.1_of_3.)
+
+
+fig <- plot_ly(
+  data = raw_data,
+  x = ~DRUG_TEST_RESULTS_.1_of_3.,
+  type = "histogram",
+  name = "DRUG_TEST_RESULTS_.1_of_3."
+) %>% 
+  add_lines(x = dens$x, y = dens$y, yaxis = "y2", name = "Density") %>% 
+  layout(yaxis2 = list(overlaying = "y", #Adds the dual y-axis
+                       side = "right", #Adds the density axis on the right side
+                       rangemode = "tozero")) %>%
+  layout(title = 'DRUG_TEST_RESULTS_.1_of_3. column distribution')
+fig
+```
+### **Plot the distribution of DRUG_TEST_RESULTS_.2_of_3. feature**
+```{r}
+dens <- density(raw_data$DRUG_TEST_RESULTS_.2_of_3.)
+
+
+fig <- plot_ly(
+  data = raw_data,
+  x = ~DRUG_TEST_RESULTS_.2_of_3.,
+  type = "histogram",
+  name = "DRUG_TEST_RESULTS_.2_of_3."
+) %>% 
+  add_lines(x = dens$x, y = dens$y, yaxis = "y2", name = "Density") %>% 
+  layout(yaxis2 = list(overlaying = "y", #Adds the dual y-axis
+                       side = "right", #Adds the density axis on the right side
+                       rangemode = "tozero")) %>%
+  layout(title = 'DRUG_TEST_RESULTS_.2_of_3. column distribution')
+fig
+```
+### **Plot the distribution of DRUG_TEST_RESULTS_.3_of_3. feature**
+```{r}
+dens <- density(raw_data$DRUG_TEST_RESULTS_.3_of_3.)
+
+
+fig <- plot_ly(
+  data = raw_data,
+  x = ~DRUG_TEST_RESULTS_.3_of_3.,
+  type = "histogram",
+  name = "DRUG_TEST_RESULTS_.3_of_3."
+) %>% 
+  add_lines(x = dens$x, y = dens$y, yaxis = "y2", name = "Density") %>% 
+  layout(yaxis2 = list(overlaying = "y", #Adds the dual y-axis
+                       side = "right", #Adds the density axis on the right side
+                       rangemode = "tozero")) %>%
+  layout(title = 'DRUG_TEST_RESULTS_.3_of_3. column distribution')
+fig
+```
+
+### **Numerical Columns Distribution with respect to the Target Variable**
+```{r}
+fig <- plot_ly(temp, x = ~INJURY_SEVERITY, y = ~ALCOHOL_TEST_RESULT, color = ~INJURY_SEVERITY, type = "box") %>%
+       layout(title = 'ALCOHOL_TEST_RESULT column distribution regarding INJURY_SEVERITY')
+fig
+```
+```{r}
+fig <- plot_ly(temp, x = ~INJURY_SEVERITY, y = ~DRUG_TEST_RESULTS_.1_of_3., color = ~INJURY_SEVERITY, type = "box") %>%
+       layout(title = 'DRUG_TEST_RESULTS_.1_of_3. column distribution regarding INJURY_SEVERITY')
+fig
+```
+
+```{r}
+fig <- plot_ly(temp, x = ~INJURY_SEVERITY, y = ~DRUG_TEST_RESULTS_.2_of_3., color = ~INJURY_SEVERITY, type = "box") %>%
+       layout(title = 'DRUG_TEST_RESULTS_.2_of_3. column distribution regarding INJURY_SEVERITY')
+fig
+```
+
+```{r}
+fig <- plot_ly(temp, x = ~INJURY_SEVERITY, y = ~DRUG_TEST_RESULTS_.3_of_3., color = ~INJURY_SEVERITY, type = "box") %>%
+       layout(title = 'DRUG_TEST_RESULTS_.3_of_3. column distribution regarding INJURY_SEVERITY')
+fig
+```
+
+## **Plot Distribution of Categorical Columns**
+```{r}
+
+for (i in 1:length(col_labels)) {
+  
+  if (col_labels[i] %in% categorical_c) {
+    fig <- plot_ly(raw_data, labels = raw_data[,i], type = 'pie')
+    fig <- fig %>% layout(title = sprintf("%s Distribution", col_labels[i]),
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    print(fig)
+  }
+}
+
+```
+
+### **Plot SEX Column Distribution with Respect to Target Variable**
+```{r}
+#create table of counts
+counts2 <- table(temp$INJURY_SEVERITY, temp$SEX)
+
+#create mosaic plot
+subs_pal = colorspace::qualitative_hcl(2)
+mosaicplot(counts2, xlab='INJURY_SEVERITY', ylab='SEX',
+           main='INJURY_SEVERITY & SEX', col=subs_pal, off = 10, las = 1)
+
+```
+
+### **Plot TAKEN_TO_HOSPITAL Column Distribution with Respect to Target Variable**
+```{r}
+#create table of counts
+counts1 <- table(temp$INJURY_SEVERITY, temp$TAKEN_TO_HOSPITAL)
+
+#create mosaic plot
+subs_pal = colorspace::qualitative_hcl(2)
+mosaicplot(counts1, xlab='INJURY_SEVERITY', ylab='TAKEN_TO_HOSPITAL',
+           main='INJURY_SEVERITY & TAKEN_TO_HOSPITAL', col=subs_pal, off = 10, las = 1)
+```
+
+### **Categorical Columns Distribution with respect to the Target Variable**
+```{r}
+#create table of counts
+for (i in 1:length(col_labels)) {
+  
+  if (col_labels[i] %in% categorical_c) {
+    print("")
+    print(col_labels[i])
+    print(table(temp$INJURY_SEVERITY, temp[, i]))
+    print("")
+  }
+}
+```
+
+## **Plot Correlations**
+```{r}
+for (i in 1:length(names(raw_data))) {
+  x = as.numeric(factor(raw_data[,i]))
+  raw_data[,i] = x
+}
+data_corr <- cor(raw_data)
+```
+
+### **Plot Correlation Matrix**
+```{r}
+fig <- plot_ly(x = names(data.frame(data_corr)), 
+               y = names(data.frame(data_corr)), 
+               z = data_corr, type = "heatmap") %>% 
+  layout(title = "Correlation Within the Dataset", autosize = F, width = 1000, height = 1000)
+
+fig
+```
+
+### **Features Ordered by Corr value with Target Variable**
+```{r}
+target_corr <- c(data.frame(data_corr)$INJURY_SEVERITY)
+target_cols <- c(names(data.frame(data_corr)))
+
+top_ten_cols <- target_cols[order(abs(target_corr), decreasing=TRUE)]
+top_ten_corr <- target_corr[order(abs(target_corr), decreasing=TRUE)]
+
+# Sort the attributes by correlation value and exclude the 1st one (target)
+print("Top 10 attributes correlated (absolute value) with INJURY_SEVERITY:")
+for (i in 2:length(top_ten_cols)) {
+  print(paste(i-1,".", top_ten_cols[i], "  -->  ", top_ten_corr[i]))
+}
+```
